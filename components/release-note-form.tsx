@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2, Play, Save } from "lucide-react"
+import { Plus, Trash2, Play, Save, Upload } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { ReleaseNoteData, DocumentChange, ChangelogEntry, APIEndpoint } from "@/lib/types"
 
@@ -40,6 +40,8 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
 
   const [enableChangelog, setEnableChangelog] = useState(false)
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([])
+  const [showChangelogHistoryInput, setShowChangelogHistoryInput] = useState(false)
+  const [changelogHistoryText, setChangelogHistoryText] = useState("")
 
   const handleGenerate = () => {
     if (!service || !version) {
@@ -93,6 +95,59 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
       title: "Draft saved",
       description: "Your work has been saved to browser storage.",
     })
+  }
+
+  const handleParseChangelogHistory = () => {
+    if (!changelogHistoryText.trim()) {
+      toast({
+        title: "Empty input",
+        description: "Please paste your changelog history.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const lines = changelogHistoryText.trim().split('\n').filter(line => line.trim())
+    const newEntries: ChangelogEntry[] = []
+    
+    for (const line of lines) {
+      // Parse format: [version] (date): description
+      const match = line.match(/^\s*\[([^\]]+)\]\s*\(([^)]+)\):\s*(.+)$/)
+      if (match) {
+        const [, version, date, description] = match
+        
+        // Convert date format from DD/MM/YYYY to YYYY-MM-DD
+        let formattedDate = date.trim()
+        const dateMatch = date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+        if (dateMatch) {
+          const [, day, month, year] = dateMatch
+          formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+        }
+        
+        newEntries.push({
+          version: version.trim(),
+          date: formattedDate,
+          description: description.trim(),
+        })
+      }
+    }
+    
+    if (newEntries.length > 0) {
+      setChangelog([...changelog, ...newEntries])
+      setEnableChangelog(true)
+      setChangelogHistoryText("")
+      setShowChangelogHistoryInput(false)
+      toast({
+        title: "Changelog history parsed",
+        description: `Added ${newEntries.length} changelog entries.`,
+      })
+    } else {
+      toast({
+        title: "No valid entries found",
+        description: "Please use format: [version] (date): description",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleLoadSample = () => {
@@ -182,7 +237,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
             <Label htmlFor="service">Service *</Label>
             <Input
               id="service"
-              placeholder="AI Face Service"
+              placeholder="Name of service"
               value={service}
               onChange={(e) => setService(e.target.value)}
             />
@@ -202,7 +257,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
             <Label htmlFor="contacts">Contacts</Label>
             <Input
               id="contacts"
-              placeholder="hailq9, nhatvd2"
+              placeholder="Name of contacts (separated by comma)"
               value={contacts}
               onChange={(e) => setContacts(e.target.value)}
             />
@@ -312,7 +367,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                   onCheckedChange={(checked) => setEnableDbUpdates(checked as boolean)}
                 />
                 <Label htmlFor="db-updates" className="font-semibold cursor-pointer">
-                  🗄️ Database Updates
+                Database Updates
                 </Label>
               </div>
               <span className="text-xs text-muted-foreground">Optional</span>
@@ -356,7 +411,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                   onCheckedChange={(checked) => setEnableImprovements(checked as boolean)}
                 />
                 <Label htmlFor="improvements" className="font-semibold cursor-pointer">
-                  ✨ Improvements
+                Improvements
                 </Label>
               </div>
               <span className="text-xs text-muted-foreground">Optional</span>
@@ -403,7 +458,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                   onCheckedChange={(checked) => setEnableBugFixes(checked as boolean)}
                 />
                 <Label htmlFor="bug-fixes" className="font-semibold cursor-pointer">
-                  🐛 Bug Fixes
+                Bug Fixes
                 </Label>
               </div>
               <span className="text-xs text-muted-foreground">Optional</span>
@@ -447,7 +502,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                   onCheckedChange={(checked) => setEnableAPIs(checked as boolean)}
                 />
                 <Label htmlFor="apis" className="font-semibold cursor-pointer">
-                  🔌 APIs
+                APIs
                 </Label>
               </div>
               <span className="text-xs text-muted-foreground">Optional</span>
@@ -458,7 +513,7 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                   <div key={groupIndex} className="border rounded-lg p-3 bg-muted/30">
                     <div className="flex gap-2 mb-3">
                       <Input
-                        placeholder="API Group Label (e.g., Device APIs, Cloud APIs)"
+                        placeholder="API Name (e.g., Device API, User API)"
                         value={apiGroup.label}
                         onChange={(e) => {
                           const newApiEndpoints = [...apiEndpoints]
@@ -546,8 +601,50 @@ export function ReleaseNoteForm({ onGenerate }: ReleaseNoteFormProps) {
                 📝 Changelog
               </Label>
             </div>
-            <span className="text-xs text-muted-foreground">Optional</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Optional</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowChangelogHistoryInput(!showChangelogHistoryInput)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add History
+              </Button>
+            </div>
           </div>
+          
+          {showChangelogHistoryInput && (
+            <div className="mb-4 p-4 border rounded-lg bg-muted/30">
+              <Label className="text-sm font-medium mb-2 block">
+                Paste changelog history (format: [version] (date): description)
+              </Label>
+              <Textarea
+                placeholder={`[0.0.1.20] (03/10/2025): Cross-system sync, DB + APIs, bug fixes
+[0.0.1.19] (02/10/2025): Fixed authentication issues
+[0.0.1.18] (01/10/2025): Added new API endpoints`}
+                value={changelogHistoryText}
+                onChange={(e) => setChangelogHistoryText(e.target.value)}
+                className="min-h-[120px] font-mono text-sm"
+              />
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" onClick={handleParseChangelogHistory}>
+                  Parse & Add
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    setShowChangelogHistoryInput(false)
+                    setChangelogHistoryText("")
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+          
           {enableChangelog && (
             <div className="space-y-2">
               {changelog.map((entry, index) => (

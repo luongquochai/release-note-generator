@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ReleaseNoteForm } from "./release-note-form"
 import { ReleaseNotePreview } from "./release-note-preview"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { FileDown, FileText, Copy, Eye, EyeOff, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -118,7 +119,15 @@ export function ReleaseNoteGenerator() {
         <div className="px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Release Note Generator</h1>
+              <div className="flex items-center gap-2">
+                <img 
+                  src="/logo/release-note-generator-logo.svg" 
+                  alt="Release Note Generator Logo"
+                  className="h-6 w-6 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => window.location.reload()}
+                />
+                <h1 className="text-xl font-bold tracking-tight">Release Note Generator</h1>
+              </div>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Create professional release notes with markdown preview and Word export
               </p>
@@ -163,6 +172,16 @@ export function ReleaseNoteGenerator() {
           )}
         </div>
       </main>
+      
+      <footer className="border-t border-border bg-card/50 backdrop-blur-sm flex-shrink-0">
+        <div className="px-6 py-3">
+          <div className="flex items-center justify-center">
+            <p className="text-xs text-muted-foreground">
+            © 2025 — A product from API Lab
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

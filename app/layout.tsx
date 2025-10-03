@@ -12,6 +12,14 @@ export const metadata: Metadata = {
   title: "Release Note Generator",
   description: "Create professional release notes with markdown preview and Word export",
   generator: "v0.app",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.png",
+  },
 }
 
 export default function RootLayout({
