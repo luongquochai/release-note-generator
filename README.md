@@ -124,8 +124,8 @@ npm run dev
 This project owes its existence to the collective efforts of all those who contribute — [contribute now](CONTRIBUTING.md).
 
 <div align="center">
-  <a href="https://github.com/luongquochai/apilab">
-    <img src="https://contrib.rocks/image?repo=luongquochai/apilab"
+  <a href="https://github.com/luongquochai/release-note-generator">
+    <img src="https://contrib.rocks/image?repo=luongquochai/release-note-generator"
       alt="Contributors"
       width="48"
        />
