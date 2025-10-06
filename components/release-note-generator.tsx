@@ -191,20 +191,20 @@ function generateMarkdown(data: ReleaseNoteData): string {
 
   lines.push(`# ${data.service} - Release Note`)
   lines.push("")
-  lines.push(`📅 Release Date: ${formatDate(data.date)}`)
-  lines.push(`🧩 Service: ${data.service}`)
-  lines.push(`📦 Version: ${data.version}`)
-  lines.push(`📞 Contact: ${data.contacts}`)
+  lines.push(`Release Date: ${formatDate(data.date)}`)
+  lines.push(`Service: ${data.service}`)
+  lines.push(`Version: ${data.version}`)
+  lines.push(`Contact: ${data.contacts}`)
   lines.push("\n---\n")
 
   if (data.overview) {
-    lines.push("## 🔍 Overview")
+    lines.push("## Overview")
     lines.push(data.overview)
     lines.push("")
   }
 
   if (data.documentChanges && data.documentChanges.length > 0) {
-    lines.push("## 📄 Document Changes")
+    lines.push("## Document Changes")
     lines.push("| Document | Date | Owner | Version |")
     lines.push("|----------|------|-------|---------|")
     data.documentChanges.forEach((doc) => {
@@ -220,7 +220,7 @@ function generateMarkdown(data: ReleaseNoteData): string {
     (data.apis && data.apis.length > 0 && data.apis.some(api => api.label.trim() && api.endpoints.some(ep => ep.trim())))
 
   if (hasUpdates) {
-    lines.push("## ⚙️ Updates")
+    lines.push("## Updates")
 
     if (data.databaseUpdates && data.databaseUpdates.length > 0) {
       lines.push("### Database")
@@ -257,7 +257,7 @@ function generateMarkdown(data: ReleaseNoteData): string {
   }
 
   if (data.changelog && data.changelog.length > 0) {
-    lines.push("## 🚀 Changelog")
+    lines.push("## Changelog")
     data.changelog.forEach((change) => {
       lines.push(`- **[${change.version}] (${formatDate(change.date)})**: ${change.description}`)
     })
@@ -280,14 +280,14 @@ function formatDate(date: string): string {
 async function convertMarkdownToHTML(markdown: string): Promise<string> {
   // Remove icons for DOCX compatibility
   let cleanMarkdown = markdown
-    .replace(/📅\s*/g, "")
-    .replace(/🧩\s*/g, "")
-    .replace(/📦\s*/g, "")
-    .replace(/📞\s*/g, "")
-    .replace(/📄\s*/g, "")
-    .replace(/⚙️\s*/g, "")
-    .replace(/🚀\s*/g, "")
-    .replace(/🔍\s*/g, "")
+    .replace(/Release Date:\s*/g, "")
+    .replace(/Service:\s*/g, "")
+    .replace(/Version:\s*/g, "")
+    .replace(/Contact:\s*/g, "")
+    .replace(/Document Changes:\s*/g, "")
+    .replace(/Updates:\s*/g, "")
+    .replace(/Changelog:\s*/g, "")
+    .replace(/Overview:\s*/g, "")
 
   // Split into lines for better processing
   const lines = cleanMarkdown.split('\n')
